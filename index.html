@@ -1,201 +1,185 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Eclissi</title>
-    <style>
-		body {
-			background-color: #222;
-			color: #aaa;
-			font-family: Arial;
-		}
-    </style>
-  </head>
-  <body>
-    <canvas class="myCanvas">
-      <p>This browser doesn't support canvas.</p>
-    </canvas>
-	<div>
-		Altezza osservatore:
-		<input type="range" min="0" max="90" value="90" class="slider" id="camera_alpha">
-		Terra:
-		<input type="range" min="0" max="360" value="0" class="slider" id="earth_theta">
-		Luna:
-		<input type="range" min="0" max="360" value="0" class="slider" id="moon_theta">
-		Esagerazione tilt:
-		<input type="range" min="1" max="5" value="1" class="slider" id="moon_tilt">
-	</div>
+	<head>
+		<title>Eclipse simulator</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<canvas id="myCanvas">
+		  <p>This browser doesn't support canvas.</p>
+		</canvas>
+		<div>
+			Terra:
+			<input type="range" min="0" max="360" value="0" class="slider" id="earth_theta">
+			Luna:
+			<input type="range" min="0" max="360" value="0" class="slider" id="moon_theta">
+			Esagerazione tilt:
+			<input type="range" min="1" max="5" value="3" class="slider" id="moon_tilt">
+		</div>
+		<script type="module">
+			// Parameters
+			const earthOrbitRadius = 10;
+			const moonOrbitRadius = 3;
+			const sunRadius = 1.5;
+			const earthRadius = 0.5;
+			const moonRadius = 0.3;
+			
+			// Import three.js
+			// Find the latest version by visiting https://unpkg.com/three. The URL will
+			// redirect to the newest stable release.
+			import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js';
+			import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js';
+			
+			// Links to page elements
+			const canvas = document.getElementById('myCanvas');
+			const earth_thetaSlider = document.getElementById("earth_theta");
+			const moon_thetaSlider = document.getElementById("moon_theta");
+			const moon_tiltSlider = document.getElementById("moon_tilt");
+			
+			
+			// Setup renderer
+			const renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true});
+			const width = window.innerWidth;
+			const height = window.innerHeight * 0.9;
+			const aspect_ratio = width / height;
+			renderer.setSize( width, height );
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setClearColor("#121212", 1);
+			renderer.shadowMap.enabled = true;
+			
+			// CAMERA
+			const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio, 12 * aspect_ratio, 12, -12, 1, 1000 );
+			camera.position.set(0, earthOrbitRadius * 3, 0);
+			
+			// ORBIT CONTROLS
+			const controls = new OrbitControls(camera, renderer.domElement);
+			controls.enablePan = false;
+			
+			// SCENE
+			const scene = new THREE.Scene();
+			
+			// TEXTURES
+			const loader = new THREE.TextureLoader();
+			const sunTexture = loader.load("assets/sun.jpg");
+			const earthTexture = loader.load("assets/earth.jpg");
+			const moonTexture = loader.load("assets/moon.jpg");
+			
+			// MATERIALS
+			const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
+			const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
+			const moonMaterial = new THREE.MeshStandardMaterial({ map: moonTexture });
+			
+			const orbitMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+			
+			// GEOMETRY
+			
+			// Planets
+			const geometry = new THREE.SphereGeometry(1, 32, 16);
+			
+			// Orbits
+			const orbit = new THREE.EllipseCurve(
+				0,  0,            // ax, aY
+				1, 1,           // xRadius, yRadius
+				0,  2 * Math.PI,  // aStartAngle, aEndAngle
+				false,            // aClockwise
+				0                 // aRotation
+			);
+			const points = orbit.getPoints( 50 );
+			const orbitGeometry = new THREE.BufferGeometry().setFromPoints( points );
+			
+			// MESHES
+			
+			// Sun
+			const sunMesh = new THREE.Mesh(geometry, sunMaterial);
+			sunMesh.position.set(0, 0, 0);
+			sunMesh.scale.setScalar(sunRadius);
+			scene.add(sunMesh);
+			
+			// Earth
+			const earthGroup = new THREE.Group();		// create new Group
+			earthGroup.rotation.set = new THREE.Euler();
+			const earthMesh = new THREE.Mesh(geometry, earthMaterial);
+			earthMesh.position.set(earthOrbitRadius, 0, 0);
+			earthMesh.scale.setScalar(earthRadius);
+			earthMesh.castShadow = true;
+			earthMesh.receiveShadow = true;
+			earthGroup.add(earthMesh);
+			
+			// Earth orbit	
+			const earthOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
+			earthOrbit.rotation.x = Math.PI / 2;
+			earthOrbit.scale.setScalar(earthOrbitRadius);
+			earthGroup.add(earthOrbit);
+			
+			/*
+			// Lighting
+			for (let i = 0; i < 4; i ++) {
+				const spotLight = new THREE.SpotLight( 0xffffff );
+				spotLight.position.set(0, Math.sin(i * Math.PI / 2), Math.cos(i * Math.PI / 2));
+				spotLight.target = earthMesh;
+				spotLight.castShadow = true;
+				earthGroup.add(spotLight);
+			}
+			*/
+			
+			scene.add(earthGroup);
+			
+			// Moon
+			const moonMainGroup = new THREE.Group();
+			moonMainGroup.rotation.set = new THREE.Euler();
+			
+			const moonGroup = new THREE.Group();
+			moonGroup.rotation.set = new THREE.Euler();
+			
+			const moonMesh = new THREE.Mesh(geometry, moonMaterial);
+			moonMesh.position.set(moonOrbitRadius, 0, 0);
+			moonMesh.scale.setScalar(moonRadius);
+			moonMesh.castShadow = true;
+			moonMesh.receiveShadow = true;
+			moonGroup.add(moonMesh);
+			
+			// Moon orbit
+			const moonOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
+			moonOrbit.rotation.x = Math.PI / 2;
+			moonOrbit.scale.setScalar(moonOrbitRadius);
+			moonGroup.add(moonOrbit);
+			
+			moonMainGroup.add(moonGroup);
+						
+			moonMainGroup.position.set(earthOrbitRadius, 0, 0);
+			moonMainGroup.rotation.z = moon_tiltSlider.value * 5.14 * Math.PI / 180;
+			
+			scene.add(moonMainGroup);
+			
+			// Lighting
+			const light = new THREE.DirectionalLight( 0xffffff, 5 );
+			light.position.set( 0, 0, 0 );
+			light.target = earthMesh;
+			light.castShadow = true;
+			scene.add(light);
 
-    <script>
+			// Controls
+			earth_thetaSlider.oninput = function() {
+				const theta = this.value * Math.PI / 180;
+				earthGroup.rotation.y = theta;
+				moonMainGroup.position.set(earthOrbitRadius * Math.cos(theta), 0, - earthOrbitRadius * Math.sin(theta));
+			}
+			moon_thetaSlider.oninput = function() {
+				moonGroup.rotation.y = this.value * Math.PI / 180;
+			}
+			moon_tiltSlider.oninput = function() {
+				moonMainGroup.rotation.z = this.value * 5.14 * Math.PI / 180;
+			}
+			
+			const animate = function () {
+				renderer.render( scene, camera );
+				requestAnimationFrame( animate );
+			};
 
-// Link to canvas
-const canvas = document.querySelector('.myCanvas');
-const ctx = canvas.getContext('2d');
-
-// Link to controls
-const camera_alphaSlider = document.getElementById("camera_alpha");
-const earth_thetaSlider = document.getElementById("earth_theta");
-const moon_thetaSlider = document.getElementById("moon_theta");
-const moon_tiltSlider = document.getElementById("moon_tilt");
-
-// Canvas dimensions
-const width = canvas.width = document.body.offsetWidth;
-const height = canvas.height = window.innerHeight * 0.9;
-
-// Camera parameter
-let camera = {
-	alpha: Math.PI / 2
-}
-
-// Earth
-let Earth = {
-	or: Math.min ( width, height ) / 3, // Orbital radius
-	r: 20, // Earth radius
-	theta: 0, // Phase
-	
-	// x coordinate
-	get x() {
-		return width / 2 + this.or * Math.cos(this.theta);
-	},
-	
-	// y coordinate
-	get y() {
-		return height / 2 + this.or * Math.sin(this.theta) * Math.sin(camera.alpha)
-	},
-	
-	// draw the Earth, the Moon and the Moon's orbit
-	draw() {
-		// Moon orbit (back)
-		Moon.drawOrbit( Math.PI, 2 * Math.PI );
-		
-		// Moon (if back)
-		if ( Moon.theta > Math.PI ) { Moon.draw(); }
-		
-		// Earth
-		ctx.fillStyle = "rgb(0,150,50)";
-		ctx.beginPath();
-		ctx.arc( Earth.x , Earth.y , Earth.r, 0, 2 * Math.PI);
-		ctx.fill();
-		
-		
-		// Moon orbit (front)
-		Moon.drawOrbit( 0, Math.PI );
-		
-		// Moon (if in front)
-		if ( Moon.theta <= Math.PI ) { Moon.draw(); }
-	},
-	
-	// Draw Earth's orbit
-	drawOrbit( from, to ) {
-		ctx.strokeStyle = "rgb(150,150,150)";
-		ctx.beginPath();
-		ctx.ellipse(width / 2, height / 2, Earth.or, Earth.or * Math.sin(camera.alpha), 0, from, to);
-		ctx.stroke();
-	}
-}
-
-// Moon
-let Moon = {
-	or: 50, // Orbital radius
-	r: 10, // Moon radius
-	theta: 0, // Phase
-	tilt_ex: 1, // Tilt exageration
-	
-	// Calculate exagerated tilt
-	get tilt() {
-		return 5.14 * Math.PI / 180 * this.tilt_ex;
-	},
-	
-	// x coordinate
-	get x() {
-		return Earth.x + this.or * Math.cos(this.theta) * Math.cos(this.tilt);
-	},
-	
-	// y coordinate
-	get y() {
-		return Earth.y + this.or * ( Math.sin(this.theta) * Math.sin(camera.alpha) - Math.cos(this.theta) * Math.sin(this.tilt) * Math.cos(camera.alpha) );
-	},
-	
-	// Obtain orbit shape parameters
-	get orbitPars() {
-		// Transformation from https://stackoverflow.com/questions/48252112/draw-circle-svg-orthogonal-projections
-		const A = Math.pow( Math.cos(this.tilt), 2 );
-		const B = - 2 * Math.sin( this.tilt ) * Math.cos( this.tilt ) * Math.cos( camera.alpha );
-		const C = Math.pow( Math.sin( this.tilt ) * Math.cos( camera.alpha ) , 2 ) + Math.pow( Math.sin( camera.alpha ), 2 );
-		const K = Math.sqrt((A - C) * (A - C) + B * B);
-		const rx = Math.sqrt(0.5 * (A + C + K));
-		const ry = Math.sqrt(0.5 * Math.max(0, A + C - K));
-		const rotation = Math.abs((A - C) / B) < 1e-6 ? Math.PI / 2 : Math.atan2(B, A - C) / 2;
-		
-		return { rx: rx, ry: ry, rotation: rotation };
-	},
-	
-	// Draw the orbit
-	drawOrbit(from, to) {		
-		ctx.strokeStyle = "rgb(150,150,150)";
-		ctx.beginPath();
-		ctx.ellipse( Earth.x , Earth.y , this.or * this.orbitPars.rx, this.or * this.orbitPars.ry, this.orbitPars.rotation, from, to);
-		ctx.stroke();
-
-	},
-	
-	// Draw the moon
-	draw() {
-		ctx.fillStyle = "rgb(150,150,150)";
-		ctx.beginPath();
-		ctx.arc( this.x, this.y, this.r, 0, 2 * Math.PI);
-		ctx.fill();
-	}
-}
-
-drawCanvas = function() {
-	// Background
-	ctx.fillStyle = "rgb(0,0,0)";
-	ctx.fillRect(0,0, width, height);
-	
-	// Earth orbit (back)
-	Earth.drawOrbit( Math.PI, 2 * Math.PI );
-	
-	// Earth (if back)
-	if ( Earth.theta > Math.PI ) { Earth.draw(); }
-
-	// Sun
-	ctx.fillStyle = "rgb(150,150,0)";
-	ctx.beginPath();
-	ctx.arc(width / 2, height / 2, 30, 0, 2 * Math.PI);
-	ctx.fill();
-
-	// Earth orbit (front)
-	Earth.drawOrbit( 0, Math.PI );
-
-	// Earth (if in front)
-	if ( Earth.theta <= Math.PI ) { Earth.draw(); }
-
-}
-
-// Controls
-camera_alphaSlider.oninput = function() {
-	camera.alpha = this.value * Math.PI / 180 ;
-	drawCanvas();
-}
-earth_thetaSlider.oninput = function() {
-	Earth.theta = this.value * Math.PI / 180 ;
-	drawCanvas();
-}
-moon_thetaSlider.oninput = function() {
-	Moon.theta = this.value * Math.PI / 180 ;
-	drawCanvas();
-}
-moon_tiltSlider.oninput = function() {
-	Moon.tilt_ex = this.value;
-	drawCanvas();
-}
-
-// Draw the initial scene
-drawCanvas();
-
-
-
-    </script>
-  </body>
+			animate();
+		</script>
+	</body>
 </html>
