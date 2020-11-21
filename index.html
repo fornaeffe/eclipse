@@ -136,6 +136,7 @@
 			
 			const moonMesh = new THREE.Mesh(geometry, moonMaterial);
 			moonMesh.position.set(moonOrbitRadius, 0, 0);
+			moonMesh.rotation.y = Math.PI;
 			moonMesh.scale.setScalar(moonRadius);
 			moonMesh.castShadow = true;
 			moonMesh.receiveShadow = true;
