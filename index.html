@@ -4,29 +4,44 @@
 		<title>Eclipse simulator</title>
 		<style>
 			body { margin: 0; }
-			canvas { display: block; }
+			.slider {
+				width: 360px;
+			}
+			#container {
+			  position: relative;
+			}
+			#Canvas2 {
+			  position: absolute;
+			  top: 0;
+			  right: 0;
+			  border: 1px solid white;
+			}
 		</style>
 	</head>
 	<body>
-		<canvas id="myCanvas">
+		<div id="container">
+		<canvas id="mainCanvas">
 		  <p>This browser doesn't support canvas.</p>
 		</canvas>
-		<div>
-			Terra:
-			<input type="range" min="0" max="360" value="0" class="slider" id="earth_theta">
-			Luna:
-			<input type="range" min="0" max="360" value="0" class="slider" id="moon_theta">
-			Esagerazione tilt:
-			<input type="range" min="1" max="5" value="3" class="slider" id="moon_tilt">
+		<canvas id="Canvas2">
+		</canvas>
 		</div>
 		<div>
-			Superficie dei pianeti da https://github.com/marshallmurphy/solar-system-threejs
+			Terra:
+			<input type="range" min="0" max="360" value="0" step="1" class="slider" id="earth_theta">
+			Luna:
+			<input type="range" min="0" max="360" value="0" step="1" class="slider" id="moon_theta">
+			Esagerazione tilt:
+			<input type="range" min="1" max="5" value="3" step="1" class="slider2" id="moon_tilt">
+		</div>
+		<div>
+			Superficie dei corpi celesti da https://github.com/marshallmurphy/solar-system-threejs
 		</div>
 		<script type="module">
 			// Parameters
 			const earthOrbitRadius = 10;
 			const moonOrbitRadius = 3;
-			const sunRadius = 1.5;
+			const sunRadius = 1;
 			const earthRadius = 0.5;
 			const moonRadius = 0.3;
 			
@@ -37,14 +52,15 @@
 			import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js';
 			
 			// Links to page elements
-			const canvas = document.getElementById('myCanvas');
+			const mainCanvas = document.getElementById('mainCanvas');
+			const canvas2 = document.getElementById('Canvas2');
 			const earth_thetaSlider = document.getElementById("earth_theta");
 			const moon_thetaSlider = document.getElementById("moon_theta");
 			const moon_tiltSlider = document.getElementById("moon_tilt");
 			
-			
-			// Setup renderer
-			const renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true});
+					
+			// Setup  main renderer
+			const renderer = new THREE.WebGLRenderer({canvas: mainCanvas, alpha: true});
 			const width = window.innerWidth;
 			const height = window.innerHeight * 0.9;
 			const aspect_ratio = width / height;
@@ -53,10 +69,24 @@
 			renderer.setClearColor("#121212", 1);
 			renderer.shadowMap.enabled = true;
 			
-			// CAMERA
+			// Setup renderer 2
+			const renderer2 = new THREE.WebGLRenderer({canvas: canvas2, alpha: true});
+			const width2 = window.innerWidth * 0.2;
+			renderer2.setSize( width2, width2 );
+			renderer2.setPixelRatio(window.devicePixelRatio);
+			renderer2.setClearColor("#121212", 1);
+			renderer2.shadowMap.enabled = true;
+			
+			// MAIN CAMERA
 			const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio, 12 * aspect_ratio, 12, -12, 1, 1000 );
 			camera.position.set(0, earthOrbitRadius * 3, 0);
 			
+			// Camera 2
+			const camera2 = new THREE.PerspectiveCamera( 20, 1, earthRadius * 1.1, earthOrbitRadius * 2 );
+			camera2.position.set(0, 0, 0);
+			camera2.lookAt(moonOrbitRadius, 0, 0);
+			
+					
 			// ORBIT CONTROLS
 			const controls = new OrbitControls(camera, renderer.domElement);
 			controls.enablePan = false;
@@ -139,10 +169,10 @@
 			
 			const moonMesh = new THREE.Mesh(geometry, moonMaterial);
 			moonMesh.position.set(moonOrbitRadius, 0, 0);
-			moonMesh.rotation.y = Math.PI;
 			moonMesh.scale.setScalar(moonRadius);
 			moonMesh.castShadow = true;
 			moonMesh.receiveShadow = true;
+			moonMesh.rotation.y = Math.PI;
 			moonGroup.add(moonMesh);
 			
 			// Moon orbit
@@ -150,6 +180,7 @@
 			moonOrbit.rotation.x = Math.PI / 2;
 			moonOrbit.scale.setScalar(moonOrbitRadius);
 			moonGroup.add(moonOrbit);
+			moonGroup.add(camera2);
 			
 			moonMainGroup.add(moonGroup);
 						
@@ -180,6 +211,7 @@
 			
 			const animate = function () {
 				renderer.render( scene, camera );
+				renderer2.render( scene, camera2 );
 				requestAnimationFrame( animate );
 			};
 
