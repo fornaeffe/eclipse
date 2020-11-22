@@ -81,6 +81,7 @@
 			// MAIN CAMERA
 			const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio, 12 * aspect_ratio, 12, -12, 1, 1000 );
 			camera.position.set(0, earthOrbitRadius * 3, 0);
+			camera.layers.enable(1);
 			
 			// Camera 2
 			const camera2 = new THREE.PerspectiveCamera( 20, 1, earthRadius * 1.1, earthOrbitRadius * 2 );
@@ -140,24 +141,15 @@
 			earthMesh.scale.setScalar(earthRadius);
 			earthMesh.castShadow = true;
 			earthMesh.receiveShadow = true;
+			earthMesh.rotation.y = Math.PI;
 			earthGroup.add(earthMesh);
 			
 			// Earth orbit	
 			const earthOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
 			earthOrbit.rotation.x = Math.PI / 2;
 			earthOrbit.scale.setScalar(earthOrbitRadius);
+			earthOrbit.layers.set(1);
 			earthGroup.add(earthOrbit);
-			
-			/*
-			// Lighting
-			for (let i = 0; i < 4; i ++) {
-				const spotLight = new THREE.SpotLight( 0xffffff );
-				spotLight.position.set(0, Math.sin(i * Math.PI / 2), Math.cos(i * Math.PI / 2));
-				spotLight.target = earthMesh;
-				spotLight.castShadow = true;
-				earthGroup.add(spotLight);
-			}
-			*/
 			
 			scene.add(earthGroup);
 			
@@ -180,6 +172,7 @@
 			const moonOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
 			moonOrbit.rotation.x = Math.PI / 2;
 			moonOrbit.scale.setScalar(moonOrbitRadius);
+			moonOrbit.layers.set(1);
 			moonGroup.add(moonOrbit);
 			moonGroup.add(camera2);
 			
