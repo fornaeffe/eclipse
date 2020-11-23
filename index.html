@@ -3,7 +3,10 @@
 	<head>
 		<title>Eclipse simulator</title>
 		<style>
-			body { margin: 0; }
+			body { 
+				margin: 0; 
+				font-family: Arial, Helvetica, sans-serif;
+			}
 			.slider {
 				width: 360px;
 			}
@@ -16,17 +19,25 @@
 			  right: 0;
 			  border: 1px solid white;
 			}
+			#controls {
+				margin-left: 5px;
+			}
+			#attribution {
+				margin-left: 5px;
+				margin-top: 5px;
+				font-size: 75%;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="container">
-		<canvas id="mainCanvas">
-		  <p>This browser doesn't support canvas.</p>
-		</canvas>
-		<canvas id="Canvas2">
-		</canvas>
+			<canvas id="mainCanvas">
+				<p>This browser doesn't support canvas.</p>
+			</canvas>
+			<canvas id="Canvas2">
+			</canvas>
 		</div>
-		<div>
+		<div id="controls">
 			Terra:
 			<input type="range" min="0" max="360" value="0" step="1" class="slider" id="earth_theta">
 			Luna:
@@ -34,8 +45,8 @@
 			Esagerazione tilt:
 			<input type="range" min="1" max="5" value="3" step="1" class="slider2" id="moon_tilt">
 		</div>
-		<div>
-			Superficie dei corpi celesti da https://github.com/marshallmurphy/solar-system-threejs
+		<div id="attribution">
+			Non in scala - Superficie dei corpi celesti da <a href=https://github.com/marshallmurphy/solar-system-threejs>https://github.com/marshallmurphy/solar-system-threejs</a>
 		</div>
 		<script type="module">
 			// Prova
