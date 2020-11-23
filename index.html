@@ -6,26 +6,73 @@
 			body { 
 				margin: 0; 
 				font-family: Arial, Helvetica, sans-serif;
+				color:rgb(255, 255, 255);
+				background-color: #121212;
 			}
 			.slider {
 				width: 360px;
 			}
 			#container {
-			  position: relative;
+			  	position: relative;
 			}
-			#Canvas2 {
-			  position: absolute;
-			  top: 0;
-			  right: 0;
-			  border: 1px solid white;
-			}
-			#controls {
-				margin-left: 5px;
+			#moonViewer {
+				position: absolute;
+				top: 0;
+				right: 0;
+				border: 1px solid white;
 			}
 			#attribution {
-				margin-left: 5px;
-				margin-top: 5px;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				margin: 5px;
 				font-size: 75%;
+			}
+
+			/* Dropdown controls */
+
+			/* Remove default bullets */
+			ul, #myUL {
+				list-style-type: none;
+			}
+
+			/* Remove margins and padding from the parent ul,
+			and set it floating top left over canvas */
+			#myUL {
+			margin: 5px;
+			padding: 0;
+			position: absolute;
+			top: 0;
+			left: 0;
+			}
+
+			/* Style the caret/arrow */
+			.caret {
+			cursor: pointer;
+			user-select: none; /* Prevent text selection */
+			}
+
+			/* Create the caret/arrow with a unicode, and style it */
+			.caret::before {
+			content: "\25B6";
+			color: rgb(255, 255, 255);
+			display: inline-block;
+			margin-right: 6px;
+			}
+
+			/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+			.caret-down::before {
+			transform: rotate(90deg);
+			}
+
+			/* Hide the nested list */
+			.nested {
+			display: none;
+			}
+
+			/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+			.active {
+			display: block;
 			}
 		</style>
 	</head>
@@ -34,212 +81,244 @@
 			<canvas id="mainCanvas">
 				<p>This browser doesn't support canvas.</p>
 			</canvas>
-			<canvas id="Canvas2">
+			<canvas id="moonViewer">
 			</canvas>
-		</div>
-		<div id="controls">
-			Terra:
-			<input type="range" min="0" max="360" value="0" step="1" class="slider" id="earth_theta">
-			Luna:
-			<input type="range" min="0" max="360" value="0" step="1" class="slider" id="moon_theta">
-			Esagerazione tilt:
-			<input type="range" min="1" max="5" value="3" step="1" class="slider2" id="moon_tilt">
-			<button id="earthcamBtn">Sole/Terra</button>
-		</div>
-		<div id="attribution">
-			Non in scala - Superficie dei corpi celesti da <a href=https://github.com/marshallmurphy/solar-system-threejs>https://github.com/marshallmurphy/solar-system-threejs</a>
-		</div>
-		<script type="module">
-			// Prova
-			// Parameters
-			const earthOrbitRadius = 10;
-			const moonOrbitRadius = 3;
-			const sunRadius = 1;
-			const earthRadius = 0.5;
-			const moonRadius = 0.3;
-			
-			// Import three.js
-			// Find the latest version by visiting https://unpkg.com/three. The URL will
-			// redirect to the newest stable release.
-			import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js';
-			import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js';
-			
-			// Links to page elements
-			const mainCanvas = document.getElementById('mainCanvas');
-			const canvas2 = document.getElementById('Canvas2');
-			const earth_thetaSlider = document.getElementById("earth_theta");
-			const moon_thetaSlider = document.getElementById("moon_theta");
-			const moon_tiltSlider = document.getElementById("moon_tilt");
-			const earthcamBtn = document.getElementById("earthcamBtn");
-			
-					
-			// Setup  main renderer
-			const renderer = new THREE.WebGLRenderer({canvas: mainCanvas, alpha: true});
-			const width = window.innerWidth;
-			const height = window.innerHeight * 0.9;
-			const aspect_ratio = width / height;
-			renderer.setSize( width, height );
-			renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setClearColor("#121212", 1);
-			renderer.shadowMap.enabled = true;
-			
-			// Setup renderer 2
-			const renderer2 = new THREE.WebGLRenderer({canvas: canvas2, alpha: true});
-			const width2 = window.innerWidth * 0.2;
-			renderer2.setSize( width2, width2 );
-			renderer2.setPixelRatio(window.devicePixelRatio);
-			renderer2.setClearColor("#121212", 1);
-			renderer2.shadowMap.enabled = true;
-			
-			// MAIN CAMERA
-			const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio, 12 * aspect_ratio, 12, -12, 1, 1000 );
-			camera.position.set(0, earthOrbitRadius * 3, 0);
-			camera.layers.enable(1);
-			
-			// Camera 2
-			const camera2 = new THREE.PerspectiveCamera( 20, 1, earthRadius * 1.1, earthOrbitRadius * 2 );
-			camera2.position.set(0, 0, 0);
-			camera2.lookAt(moonOrbitRadius, 0, 0);
-			
-			// Earthcam
-			const earthcam = new THREE.OrthographicCamera( - 1.2 * moonOrbitRadius * aspect_ratio, 1.2 * moonOrbitRadius * aspect_ratio, 1.2 * moonOrbitRadius, -1.2 * moonOrbitRadius, 1, 1000);
-			earthcam.position.set(earthOrbitRadius, earthOrbitRadius * 3, 0);
-			earthcam.lookAt(earthOrbitRadius, 0, 0);
-			earthcam.layers.enable(1);
-					
-			// ORBIT CONTROLS
-			const controls = new OrbitControls(camera, renderer.domElement);
-			controls.enablePan = false;
-			
-			// SCENE
-			const scene = new THREE.Scene();
-			
-			// TEXTURES
-			const loader = new THREE.TextureLoader();
-			const sunTexture = loader.load("assets/sun.jpg");
-			const earthTexture = loader.load("assets/earth.jpg");
-			const moonTexture = loader.load("assets/moon.jpg");
-			
-			// MATERIALS
-			const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
-			const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
-			const moonMaterial = new THREE.MeshStandardMaterial({ map: moonTexture });
-			
-			const orbitMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-			
-			// GEOMETRY
-			
-			// Planets
-			const geometry = new THREE.SphereGeometry(1, 32, 16);
-			
-			// Orbits
-			const orbit = new THREE.EllipseCurve(
-				0,  0,            // ax, aY
-				1, 1,           // xRadius, yRadius
-				0,  2 * Math.PI,  // aStartAngle, aEndAngle
-				false,            // aClockwise
-				0                 // aRotation
-			);
-			const points = orbit.getPoints( 50 );
-			const orbitGeometry = new THREE.BufferGeometry().setFromPoints( points );
-			
-			// MESHES
-			
-			// Sun
-			const sunMesh = new THREE.Mesh(geometry, sunMaterial);
-			sunMesh.position.set(0, 0, 0);
-			sunMesh.scale.setScalar(sunRadius);
-			scene.add(sunMesh);
-			
-			// Earth
-			const earthGroup = new THREE.Group();		// create new Group
-			earthGroup.rotation.set = new THREE.Euler();
-			const earthMesh = new THREE.Mesh(geometry, earthMaterial);
-			earthMesh.position.set(earthOrbitRadius, 0, 0);
-			earthMesh.scale.setScalar(earthRadius);
-			earthMesh.castShadow = true;
-			earthMesh.receiveShadow = true;
-			earthMesh.rotation.y = Math.PI;
-			earthGroup.add(earthMesh);
-			earthGroup.add(earthcam);
-			
-			// Earth orbit	
-			const earthOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
-			earthOrbit.rotation.x = Math.PI / 2;
-			earthOrbit.scale.setScalar(earthOrbitRadius);
-			earthOrbit.layers.set(1);
-			earthGroup.add(earthOrbit);
-			
-			scene.add(earthGroup);
-			
-			// Moon
-			const moonMainGroup = new THREE.Group();
-			moonMainGroup.rotation.set = new THREE.Euler();
-			
-			const moonGroup = new THREE.Group();
-			moonGroup.rotation.set = new THREE.Euler();
-			
-			const moonMesh = new THREE.Mesh(geometry, moonMaterial);
-			moonMesh.position.set(moonOrbitRadius, 0, 0);
-			moonMesh.scale.setScalar(moonRadius);
-			moonMesh.castShadow = true;
-			moonMesh.receiveShadow = true;
-			moonMesh.rotation.y = Math.PI;
-			moonGroup.add(moonMesh);
-			
-			// Moon orbit
-			const moonOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
-			moonOrbit.rotation.x = Math.PI / 2;
-			moonOrbit.scale.setScalar(moonOrbitRadius);
-			moonOrbit.layers.set(1);
-			moonGroup.add(moonOrbit);
-			moonGroup.add(camera2);
-			
-			moonMainGroup.add(moonGroup);
-						
-			moonMainGroup.position.set(earthOrbitRadius, 0, 0);
-			moonMainGroup.rotation.z = moon_tiltSlider.value * 5.14 * Math.PI / 180;
-			
-			scene.add(moonMainGroup);
-			
-			// Lighting
-			const light = new THREE.DirectionalLight( 0xffffff, 2 );
-			light.position.set( 0, 0, 0 );
-			light.target = earthMesh;
-			light.castShadow = true;
-			scene.add(light);
 
-			// Controls
-			earth_thetaSlider.oninput = function() {
-				const theta = this.value * Math.PI / 180;
-				earthGroup.rotation.y = theta;
-				moonMainGroup.position.set(earthOrbitRadius * Math.cos(theta), 0, - earthOrbitRadius * Math.sin(theta));
-			}
-			moon_thetaSlider.oninput = function() {
-				moonGroup.rotation.y = this.value * Math.PI / 180;
-			}
-			moon_tiltSlider.oninput = function() {
-				moonMainGroup.rotation.z = this.value * 5.14 * Math.PI / 180;
-			}
+			<ul id="myUL">
+				<li><span class="caret">Controlli</span>
+				  	<ul class="nested">
+						<li><span class="caret">Terra</span>
+							<ul class="nested">
+								<li>
+									Rivoluzione: <input type="range" min="0" max="360" value="0" step="1" class="slider" id="earth_theta">
+								</li>
+							</ul>
+						</li>
+						<li><span class="caret">Luna</span>
+							<ul class="nested">
+								<li>
+									Rivoluzione: <input type="range" min="0" max="360" value="0" step="1" class="slider" id="moon_theta">
+								</li>
+								<li>
+									Esagerazione tilt: <input type="range" min="1" max="5" value="3" step="1" class="slider2" id="moon_tilt">
+								</li>
+							</ul>
+						</li>
+						<li>
+							<button id="earthcamBtn">Sole/Terra</button>
+						</li>
+				  	</ul>
+				</li>
+			</ul>
+			<div id="attribution">
+				Non in scala - Superficie dei corpi celesti da <a href=https://github.com/marshallmurphy/solar-system-threejs>https://github.com/marshallmurphy/solar-system-threejs</a>
+			</div>
 
-			let earthcamFlag = false;
-			earthcamBtn.onclick = function() {
-				if (earthcamFlag) {
-					earthcamFlag = false;
-					controls.enabled = true;
-				} else {
-					earthcamFlag = true;
-					controls.enabled = false;
-				}
-			}
-			
-			const animate = function () {
-				renderer.render( scene, earthcamFlag ?  earthcam : camera );
-				renderer2.render( scene, camera2 );
-				requestAnimationFrame( animate );
-			};
-
-			animate();
-		</script>
+		</div>
 	</body>
+
+	<script>
+		// Dropdown controls
+		const toggler = document.getElementsByClassName("caret");
+
+		for (let i = 0; i < toggler.length; i++) {
+			toggler[i].addEventListener("click", function() {
+				this.parentElement.querySelector(".nested").classList.toggle("active");
+				this.classList.toggle("caret-down");
+			});
+		}
+	</script>
+	
+	<script type="module">
+		// Prova
+		// Parameters
+		const earthOrbitRadius = 10;
+		const moonOrbitRadius = 3;
+		const sunRadius = 1;
+		const earthRadius = 0.5;
+		const moonRadius = 0.3;
+		
+		// Import three.js
+		// Find the latest version by visiting https://unpkg.com/three. The URL will
+		// redirect to the newest stable release.
+		import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js';
+		import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js';
+		
+		// Links to page elements
+		const mainCanvas = document.getElementById('mainCanvas');
+		const moonViewer = document.getElementById('moonViewer');
+		const earth_thetaSlider = document.getElementById("earth_theta");
+		const moon_thetaSlider = document.getElementById("moon_theta");
+		const moon_tiltSlider = document.getElementById("moon_tilt");
+		const earthcamBtn = document.getElementById("earthcamBtn");
+		
+				
+		// Setup  main renderer
+		const renderer = new THREE.WebGLRenderer({canvas: mainCanvas, alpha: true});
+		const width = window.innerWidth * 0.99;
+		const height = window.innerHeight * 0.99;
+		const aspect_ratio = width / height;
+		renderer.setSize( width, height );
+		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.setClearColor("#121212", 1);
+		renderer.shadowMap.enabled = true;
+		
+		// Setup Moon Renderer
+		const moonRenderer = new THREE.WebGLRenderer({canvas: moonViewer, alpha: true});
+		const width2 = window.innerWidth * 0.2;
+		moonRenderer.setSize( width2, width2 );
+		moonRenderer.setPixelRatio(window.devicePixelRatio);
+		moonRenderer.setClearColor("#121212", 1);
+		moonRenderer.shadowMap.enabled = true;
+		
+		// MAIN CAMERA
+		const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio, 12 * aspect_ratio, 12, -12, 1, 1000 );
+		camera.position.set(0, earthOrbitRadius * 3, 0);
+		camera.layers.enable(1);
+		
+		// Mooncam
+		const mooncam = new THREE.PerspectiveCamera( 20, 1, earthRadius * 1.1, earthOrbitRadius * 2 );
+		mooncam.position.set(0, 0, 0);
+		mooncam.lookAt(moonOrbitRadius, 0, 0);
+		
+		// Earthcam
+		const earthcam = new THREE.OrthographicCamera( - 1.2 * moonOrbitRadius * aspect_ratio, 1.2 * moonOrbitRadius * aspect_ratio, 1.2 * moonOrbitRadius, -1.2 * moonOrbitRadius, 1, 1000);
+		earthcam.position.set(earthOrbitRadius, earthOrbitRadius * 3, 0);
+		earthcam.lookAt(earthOrbitRadius, 0, 0);
+		earthcam.layers.enable(1);
+				
+		// ORBIT CONTROLS
+		const controls = new OrbitControls(camera, renderer.domElement);
+		controls.enablePan = false;
+		
+		// SCENE
+		const scene = new THREE.Scene();
+		
+		// TEXTURES
+		const loader = new THREE.TextureLoader();
+		const sunTexture = loader.load("assets/sun.jpg");
+		const earthTexture = loader.load("assets/earth.jpg");
+		const moonTexture = loader.load("assets/moon.jpg");
+		
+		// MATERIALS
+		const sunMaterial = new THREE.MeshBasicMaterial({ map: sunTexture });
+		const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
+		const moonMaterial = new THREE.MeshStandardMaterial({ map: moonTexture });
+		
+		const orbitMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+		
+		// GEOMETRY
+		
+		// Planets
+		const geometry = new THREE.SphereGeometry(1, 32, 16);
+		
+		// Orbits
+		const orbit = new THREE.EllipseCurve(
+			0,  0,            // ax, aY
+			1, 1,           // xRadius, yRadius
+			0,  2 * Math.PI,  // aStartAngle, aEndAngle
+			false,            // aClockwise
+			0                 // aRotation
+		);
+		const points = orbit.getPoints( 50 );
+		const orbitGeometry = new THREE.BufferGeometry().setFromPoints( points );
+		
+		// MESHES
+		
+		// Sun
+		const sunMesh = new THREE.Mesh(geometry, sunMaterial);
+		sunMesh.position.set(0, 0, 0);
+		sunMesh.scale.setScalar(sunRadius);
+		scene.add(sunMesh);
+		
+		// Earth
+		const earthGroup = new THREE.Group();		// create new Group
+		earthGroup.rotation.set = new THREE.Euler();
+		const earthMesh = new THREE.Mesh(geometry, earthMaterial);
+		earthMesh.position.set(earthOrbitRadius, 0, 0);
+		earthMesh.scale.setScalar(earthRadius);
+		earthMesh.castShadow = true;
+		earthMesh.receiveShadow = true;
+		earthMesh.rotation.y = Math.PI;
+		earthGroup.add(earthMesh);
+		earthGroup.add(earthcam);
+		
+		// Earth orbit	
+		const earthOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
+		earthOrbit.rotation.x = Math.PI / 2;
+		earthOrbit.scale.setScalar(earthOrbitRadius);
+		earthOrbit.layers.set(1);
+		earthGroup.add(earthOrbit);
+		
+		scene.add(earthGroup);
+		
+		// Moon
+		const moonMainGroup = new THREE.Group();
+		moonMainGroup.rotation.set = new THREE.Euler();
+		
+		const moonGroup = new THREE.Group();
+		moonGroup.rotation.set = new THREE.Euler();
+		
+		const moonMesh = new THREE.Mesh(geometry, moonMaterial);
+		moonMesh.position.set(moonOrbitRadius, 0, 0);
+		moonMesh.scale.setScalar(moonRadius);
+		moonMesh.castShadow = true;
+		moonMesh.receiveShadow = true;
+		moonMesh.rotation.y = Math.PI;
+		moonGroup.add(moonMesh);
+		
+		// Moon orbit
+		const moonOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
+		moonOrbit.rotation.x = Math.PI / 2;
+		moonOrbit.scale.setScalar(moonOrbitRadius);
+		moonOrbit.layers.set(1);
+		moonGroup.add(moonOrbit);
+		moonGroup.add(mooncam);
+		
+		moonMainGroup.add(moonGroup);
+					
+		moonMainGroup.position.set(earthOrbitRadius, 0, 0);
+		moonMainGroup.rotation.z = moon_tiltSlider.value * 5.14 * Math.PI / 180;
+		
+		scene.add(moonMainGroup);
+		
+		// Lighting
+		const light = new THREE.DirectionalLight( 0xffffff, 2 );
+		light.position.set( 0, 0, 0 );
+		light.target = earthMesh;
+		light.castShadow = true;
+		scene.add(light);
+
+		// Controls
+		earth_thetaSlider.oninput = function() {
+			const theta = this.value * Math.PI / 180;
+			earthGroup.rotation.y = theta;
+			moonMainGroup.position.set(earthOrbitRadius * Math.cos(theta), 0, - earthOrbitRadius * Math.sin(theta));
+		}
+		moon_thetaSlider.oninput = function() {
+			moonGroup.rotation.y = this.value * Math.PI / 180;
+		}
+		moon_tiltSlider.oninput = function() {
+			moonMainGroup.rotation.z = this.value * 5.14 * Math.PI / 180;
+		}
+
+		let earthcamFlag = false;
+		earthcamBtn.onclick = function() {
+			if (earthcamFlag) {
+				earthcamFlag = false;
+				controls.enabled = true;
+			} else {
+				earthcamFlag = true;
+				controls.enabled = false;
+			}
+		}
+		
+		const animate = function () {
+			renderer.render( scene, earthcamFlag ?  earthcam : camera );
+			moonRenderer.render( scene, mooncam );
+			requestAnimationFrame( animate );
+		};
+
+		animate();
+	</script>
 </html>
