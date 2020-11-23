@@ -44,6 +44,7 @@
 			<input type="range" min="0" max="360" value="0" step="1" class="slider" id="moon_theta">
 			Esagerazione tilt:
 			<input type="range" min="1" max="5" value="3" step="1" class="slider2" id="moon_tilt">
+			<button id="earthcamBtn">Sole/Terra</button>
 		</div>
 		<div id="attribution">
 			Non in scala - Superficie dei corpi celesti da <a href=https://github.com/marshallmurphy/solar-system-threejs>https://github.com/marshallmurphy/solar-system-threejs</a>
@@ -69,6 +70,7 @@
 			const earth_thetaSlider = document.getElementById("earth_theta");
 			const moon_thetaSlider = document.getElementById("moon_theta");
 			const moon_tiltSlider = document.getElementById("moon_tilt");
+			const earthcamBtn = document.getElementById("earthcamBtn");
 			
 					
 			// Setup  main renderer
@@ -99,6 +101,11 @@
 			camera2.position.set(0, 0, 0);
 			camera2.lookAt(moonOrbitRadius, 0, 0);
 			
+			// Earthcam
+			const earthcam = new THREE.OrthographicCamera( - 1.2 * moonOrbitRadius * aspect_ratio, 1.2 * moonOrbitRadius * aspect_ratio, 1.2 * moonOrbitRadius, -1.2 * moonOrbitRadius, 1, 1000);
+			earthcam.position.set(earthOrbitRadius, earthOrbitRadius * 3, 0);
+			earthcam.lookAt(earthOrbitRadius, 0, 0);
+			earthcam.layers.enable(1);
 					
 			// ORBIT CONTROLS
 			const controls = new OrbitControls(camera, renderer.domElement);
@@ -154,6 +161,7 @@
 			earthMesh.receiveShadow = true;
 			earthMesh.rotation.y = Math.PI;
 			earthGroup.add(earthMesh);
+			earthGroup.add(earthcam);
 			
 			// Earth orbit	
 			const earthOrbit = new THREE.Line( orbitGeometry, orbitMaterial );
@@ -213,9 +221,20 @@
 			moon_tiltSlider.oninput = function() {
 				moonMainGroup.rotation.z = this.value * 5.14 * Math.PI / 180;
 			}
+
+			let earthcamFlag = false;
+			earthcamBtn.onclick = function() {
+				if (earthcamFlag) {
+					earthcamFlag = false;
+					controls.enabled = true;
+				} else {
+					earthcamFlag = true;
+					controls.enabled = false;
+				}
+			}
 			
 			const animate = function () {
-				renderer.render( scene, camera );
+				renderer.render( scene, earthcamFlag ?  earthcam : camera );
 				renderer2.render( scene, camera2 );
 				requestAnimationFrame( animate );
 			};
