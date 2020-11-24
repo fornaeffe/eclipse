@@ -9,9 +9,6 @@
 				color:rgb(255, 255, 255);
 				background-color: #121212;
 			}
-			.slider {
-				width: 360px;
-			}
 			#container {
 			  	position: relative;
 			}
@@ -73,6 +70,69 @@
 			/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
 			.active {
 				display: block;
+				padding-left: 10px;
+			}
+
+			/* Checkboxes */
+			/* from https://codepen.io/JAGATHISH1123/embed/PvayMB?default-tab=&theme-id= */
+			.switch {
+			position: relative;
+			display: inline-block;
+			width: 32px;
+			height: 16px;
+			background-color: rgba(255, 255, 255, 0.25);
+			border-radius: 16px;
+			transition: all 0.3s;
+			}
+			.switch::after {
+			content: '';
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius:50%;
+			background-color: white;
+			top: 2px;
+			left: 2px;
+			transition: all 0.3s;
+			}
+
+			.checkbox:checked + .switch::after {
+			left : 16px;
+			}
+			.checkbox:checked + .switch {
+			background-color: #bada55;
+			}
+			.checkbox {
+			display : none;
+			}
+
+			/* SLIDERS */
+			/* The slider itself */
+			.slider {
+			-webkit-appearance: none;  /* Override default CSS styles */
+			appearance: none;
+			width: 100px;
+			height: 16px;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.25);
+			}
+
+			/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+			.slider::-webkit-slider-thumb {
+			-webkit-appearance: none; /* Override default look */
+			appearance: none;
+			width: 12px;
+			height: 12px;
+			border-radius: 6px;
+			background: #bada55;
+			cursor: pointer;
+			}
+			.slider::-moz-range-thumb {
+			width: 12px;
+			height: 12px;
+			border-radius: 6px;
+			background: #bada55;
+			cursor: pointer;
 			}
 		</style>
 	</head>
@@ -90,22 +150,38 @@
 						<li><span class="caret">Terra</span>
 							<ul class="nested">
 								<li>
-									Rivoluzione: <input type="range" min="0" max="360" value="0" step="1" class="slider" id="earth_theta">
+									<input type="checkbox" id="earthrot" class="checkbox" />  
+									<label for="earthrot" class="switch"></label>
+									Rotazione
+								</li>
+								<li>
+									<input type="checkbox" id="earthrev" class="checkbox" />  
+									<label for="earthrev" class="switch"></label>
+									Rivoluzione
 								</li>
 							</ul>
 						</li>
 						<li><span class="caret">Luna</span>
 							<ul class="nested">
 								<li>
-									Rivoluzione: <input type="range" min="0" max="360" value="0" step="1" class="slider" id="moon_theta">
+									<input type="checkbox" id="moonrev" class="checkbox" />  
+									<label for="moonrev" class="switch"></label>
+									Rivoluzione
 								</li>
 								<li>
-									Esagerazione tilt: <input type="range" min="1" max="5" value="3" step="1" class="slider2" id="moon_tilt">
+									Esagerazione tilt: <br />
+									<input type="range" min="1" max="5" value="3" step="1" class="slider" id="moon_tilt">
 								</li>
 							</ul>
 						</li>
 						<li>
-							<button id="earthcamBtn">Sole/Terra</button>
+							<input type="checkbox" id="earthcam" class="checkbox" />  
+							<label for="earthcam" class="switch"></label>
+							Zoom sulla Terra
+						</li>
+						<li>
+							Velocità:<br />
+							<input type="range" min="-5" max="5" value="0" step="0.5" class="slider" id="speed">
 						</li>
 				  	</ul>
 				</li>
@@ -147,12 +223,13 @@
 		// Links to page elements
 		const mainCanvas = document.getElementById('mainCanvas');
 		const moonViewer = document.getElementById('moonViewer');
-		const earth_thetaSlider = document.getElementById("earth_theta");
-		const moon_thetaSlider = document.getElementById("moon_theta");
 		const moon_tiltSlider = document.getElementById("moon_tilt");
-		const earthcamBtn = document.getElementById("earthcamBtn");
-		
-				
+		const earthcamSwitch = document.getElementById("earthcam");
+		const earthrot = document.getElementById("earthrot");
+		const earthrev = document.getElementById("earthrev");
+		const moonrev = document.getElementById("moonrev");	
+		const speedSlider = document.getElementById("speed");	
+
 		// Setup  main renderer
 		const renderer = new THREE.WebGLRenderer({canvas: mainCanvas, alpha: true});
 		const width = window.innerWidth * 0.99;
@@ -290,31 +367,21 @@
 		scene.add(light);
 
 		// Controls
-		earth_thetaSlider.oninput = function() {
-			const theta = this.value * Math.PI / 180;
-			earthGroup.rotation.y = theta;
-			moonMainGroup.position.set(earthOrbitRadius * Math.cos(theta), 0, - earthOrbitRadius * Math.sin(theta));
-		}
-		moon_thetaSlider.oninput = function() {
-			moonGroup.rotation.y = this.value * Math.PI / 180;
-		}
 		moon_tiltSlider.oninput = function() {
 			moonMainGroup.rotation.z = this.value * 5.14 * Math.PI / 180;
 		}
-
-		let earthcamFlag = false;
-		earthcamBtn.onclick = function() {
-			if (earthcamFlag) {
-				earthcamFlag = false;
-				controls.enabled = true;
-			} else {
-				earthcamFlag = true;
-				controls.enabled = false;
-			}
-		}
 		
 		const animate = function () {
-			renderer.render( scene, earthcamFlag ?  earthcam : camera );
+			// Movements
+			const deltaT = Math.pow(speedSlider.value, 3) / 100;
+			if (earthrot.checked) earthMesh.rotation.y += deltaT * Math.PI * 2;
+			if (earthrev.checked) {
+				earthGroup.rotation.y += deltaT / 365.25 * Math.PI * 2;
+				moonMainGroup.position.set(earthOrbitRadius * Math.cos(earthGroup.rotation.y), 0, - earthOrbitRadius * Math.sin(earthGroup.rotation.y));
+			}
+			if (moonrev.checked) moonGroup.rotation.y += deltaT / 29.5 * Math.PI * 2;
+
+			renderer.render( scene, earthcamSwitch.checked ?  earthcam : camera );
 			moonRenderer.render( scene, mooncam );
 			requestAnimationFrame( animate );
 		};
