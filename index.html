@@ -390,7 +390,24 @@
 		moon_tiltSlider.oninput = function() {
 			moonMainGroup.rotation.z = this.value * 5.14 * Math.PI / 180;
 		}
-		
+
+		// Resizer
+		function resizer() {			
+			const width = window.innerWidth * 0.99;
+			const height = window.innerHeight * 0.99;
+			const aspect_ratio = width / height;
+			renderer.setSize( width, height );
+			const width2 = window.innerWidth * 0.2;
+			moonRenderer.setSize( width2, width2 );
+			camera.left = -12 * aspect_ratio;
+			camera.right = 12 * aspect_ratio;
+			camera.updateProjectionMatrix();
+			earthcam.left =  - 1.2 * moonOrbitRadius * aspect_ratio;
+			earthcam.right =  1.2 * moonOrbitRadius * aspect_ratio;
+			earthcam.updateProjectionMatrix();
+		}
+		window.addEventListener('resize', resizer);
+
 		const animate = function () {
 			// Movements
 			const deltaT = Math.pow(speedSlider.value, 3) / 100;
