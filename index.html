@@ -269,7 +269,7 @@
 		
 		// Setup Moon Renderer
 		const moonRenderer = new THREE.WebGLRenderer({canvas: moonViewer, alpha: true});
-		const width2 = Math.min(window.innerWidth, window.innerHeight) * 0.4;
+		const width2 = Math.min(window.innerWidth, window.innerHeight) * 0.3;
 		moonRenderer.setSize( width2, width2 );
 		moonRenderer.setPixelRatio(window.devicePixelRatio);
 		moonRenderer.setClearColor("#121212", 1);
@@ -404,7 +404,7 @@
 			const height = window.innerHeight * 0.99;
 			const aspect_ratio = width / height;
 			renderer.setSize( width, height );
-			const width2 = Math.min(window.innerWidth, window.innerHeight) * 0.4;
+			const width2 = Math.min(window.innerWidth, window.innerHeight) * 0.3;
 			moonRenderer.setSize( width2, width2 );
 			camera.left = camera.bottom * aspect_ratio;
 			camera.right = camera.top * aspect_ratio;
