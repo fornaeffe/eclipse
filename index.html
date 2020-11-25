@@ -3,6 +3,9 @@
 	<head>
 		<title>Eclipse simulator</title>
 		<style>
+			* {
+				outline-style: none;
+			}
 			body { 
 				margin: 0; 
 				font-family: Arial, Helvetica, sans-serif;
@@ -154,6 +157,9 @@
 			background: #bada55;
 			cursor: pointer;
 			}
+			output {
+			color: #bada55;
+			}
 		</style>
 	</head>
 	<body>
@@ -190,7 +196,7 @@
 								</li>
 								<li>
 									Esagerazione tilt: <br />
-									<input type="range" min="1" max="5" value="3" step="1" class="slider" id="moon_tilt">
+									<input type="range" min="1" max="5" value="3" step="1" class="slider" id="moon_tilt" />
 								</li>
 							</ul>
 						</li>
@@ -201,7 +207,8 @@
 						</li>
 						<li>
 							Velocità:<br />
-							<input type="range" min="-5" max="5" value="0" step="0.5" class="slider" id="speed">
+							<input type="range" min="-5" max="5" value="0" step="0.5" class="slider" id="speed" oninput="speedoutput.value = value"/>
+							<output id="speedoutput">0</output>
 						</li>
 				  	</ul>
 				</li>
@@ -262,7 +269,7 @@
 		
 		// Setup Moon Renderer
 		const moonRenderer = new THREE.WebGLRenderer({canvas: moonViewer, alpha: true});
-		const width2 = window.innerWidth * 0.2;
+		const width2 = Math.min(window.innerWidth, window.innerHeight) * 0.4;
 		moonRenderer.setSize( width2, width2 );
 		moonRenderer.setPixelRatio(window.devicePixelRatio);
 		moonRenderer.setClearColor("#121212", 1);
@@ -397,13 +404,13 @@
 			const height = window.innerHeight * 0.99;
 			const aspect_ratio = width / height;
 			renderer.setSize( width, height );
-			const width2 = window.innerWidth * 0.2;
+			const width2 = Math.min(window.innerWidth, window.innerHeight) * 0.4;
 			moonRenderer.setSize( width2, width2 );
-			camera.left = -12 * aspect_ratio;
-			camera.right = 12 * aspect_ratio;
+			camera.left = camera.bottom * aspect_ratio;
+			camera.right = camera.top * aspect_ratio;
 			camera.updateProjectionMatrix();
-			earthcam.left =  - 1.2 * moonOrbitRadius * aspect_ratio;
-			earthcam.right =  1.2 * moonOrbitRadius * aspect_ratio;
+			earthcam.left =  earthcam.bottom * aspect_ratio;
+			earthcam.right =  earthcam.top * aspect_ratio;
 			earthcam.updateProjectionMatrix();
 		}
 		window.addEventListener('resize', resizer);
