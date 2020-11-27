@@ -56,6 +56,7 @@
 			/* Remove default bullets */
 			ul, #myUL {
 				list-style-type: none;
+				padding-left: 10px;
 			}
 
 			/* Remove margins and padding from the parent ul,
@@ -95,7 +96,6 @@
 			/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
 			.active {
 				display: block;
-				padding-left: 10px;
 			}
 
 			/* Checkboxes */
@@ -175,8 +175,13 @@
 			<ul id="myUL">
 				<li><span class="caret">Controlli</span>
 				  	<ul class="nested">
-						<li><span class="caret">Terra</span>
-							<ul class="nested">
+						<li>
+							Velocità:<br />
+							<input type="range" min="-5" max="5" value="0" step="0.5" class="slider" id="speed" oninput="speedoutput.value = value"/>
+							<output id="speedoutput">0</output>
+						</li>
+						<li>Terra
+							<ul>
 								<li>
 									<input type="checkbox" id="earthrot" class="checkbox" />  
 									<label for="earthrot" class="switch"></label>
@@ -189,8 +194,8 @@
 								</li>
 							</ul>
 						</li>
-						<li><span class="caret">Luna</span>
-							<ul class="nested">
+						<li>Luna
+							<ul>
 								<li>
 									<input type="checkbox" id="moonrev" class="checkbox" />  
 									<label for="moonrev" class="switch"></label>
@@ -206,11 +211,6 @@
 							<input type="checkbox" id="earthcam" class="checkbox" />  
 							<label for="earthcam" class="switch"></label>
 							Zoom sulla Terra
-						</li>
-						<li>
-							Velocità:<br />
-							<input type="range" min="-5" max="5" value="0" step="0.5" class="slider" id="speed" oninput="speedoutput.value = value"/>
-							<output id="speedoutput">0</output>
 						</li>
 				  	</ul>
 				</li>
