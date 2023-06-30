@@ -164,6 +164,15 @@
 			color: #bada55;
 			}
 		</style>
+		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+		<script type="importmap">
+			{
+				"imports": {
+				"three": "https://unpkg.com/three@0.153.0/build/three.module.js",
+				"three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<div id="container">
@@ -235,20 +244,26 @@
 		}
 	</script>
 	
-	<script type="module">
-		// Prova
+	<script type="module">		
 		// Parameters
-		const earthOrbitRadius = 10;
-		const moonOrbitRadius = 3;
-		const sunRadius = 1;
-		const earthRadius = 0.5;
-		const moonRadius = 0.3;
+		const modelScale = 0.2;
+		const offsetY = 1;
+		const offsetZ = 1;
+
+		const earthOrbitRadius = 10 * modelScale;
+		const moonOrbitRadius = 3 * modelScale;
+		const sunRadius = 1 * modelScale;
+		const earthRadius = 0.5 * modelScale;
+		const moonRadius = 0.3 * modelScale;
+
+		
 		
 		// Import three.js
 		// Find the latest version by visiting https://unpkg.com/three. The URL will
 		// redirect to the newest stable release.
-		import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js';
-		import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js';
+		import * as THREE from 'three';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { VRButton } from 'three/addons/webxr/VRButton.js';
 		
 		// Links to page elements
 		const mainCanvas = document.getElementById('mainCanvas');
@@ -279,7 +294,7 @@
 		moonRenderer.shadowMap.enabled = true;
 		
 		// MAIN CAMERA
-		const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio, 12 * aspect_ratio, 12, -12, 1, 1000 );
+		const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio * modelScale, 12 * aspect_ratio * modelScale, 12 * modelScale, -12 * modelScale, 1, 1000 );
 		camera.position.set(0, earthOrbitRadius * 3, 0);
 		camera.layers.enable(1);
 		
@@ -358,6 +373,8 @@
 		earthGroup.add(earthOrbit);
 		
 		scene.add(earthGroup);
+
+		
 		
 		// Moon
 		const moonMainGroup = new THREE.Group();
