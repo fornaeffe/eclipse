@@ -329,6 +329,7 @@
 		const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio * modelScale, 12 * aspect_ratio * modelScale, 12 * modelScale, -12 * modelScale, 1, 1000 );
 		camera.position.set(0, earthOrbitRadius * 3, 0);
 		camera.layers.enable(1);
+		camera.layers.enable(2);
 		scene.add(camera)
 		
 		// Mooncam
@@ -341,6 +342,7 @@
 		earthcam.position.set(earthOrbitRadius, earthOrbitRadius * 3, 0);
 		earthcam.lookAt(earthOrbitRadius, 0, 0);
 		earthcam.layers.enable(1);
+		earthcam.layers.enable(2);
 				
 		// ORBIT CONTROLS
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -401,6 +403,7 @@
 		earthOrbit.rotation.x = Math.PI / 2;
 		earthOrbit.scale.setScalar(earthOrbitRadius);
 		earthOrbit.layers.set(1);
+		earthOrbit.layers.enable(2);
 		earthGroup.add(earthOrbit);
 
 		scene.add(earthGroup);
@@ -428,6 +431,7 @@
 		moonOrbit.rotation.x = Math.PI / 2;
 		moonOrbit.scale.setScalar(moonOrbitRadius);
 		moonOrbit.layers.set(1);
+		moonOrbit.layers.enable(2);
 		moonGroup.add(moonOrbit);
 		moonGroup.add(mooncam);
 		
