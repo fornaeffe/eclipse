@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import {Text} from 'troika-three-text';
 
 // Parameters
 const modelScale = 0.2;
@@ -218,7 +219,27 @@ renderer.xr.addEventListener("sessionstart", (e) => {
     const myTransform = new XRRigidTransform({y: offsetY, z: offsetZ})
     const newReferenceSpace = baseReferenceSpace.getOffsetReferenceSpace(myTransform)
     renderer.xr.setReferenceSpace(newReferenceSpace)
+
+    // Give instructions
+    const myText = new Text()
+    scene.add(myText)
+    // Set properties to configure:
+    myText.text = 'Main button: move simulation forward\n' +
+        'Squeeze button: move simulation backward\n' +
+        'Thumbstick: fly'
+    myText.fontSize = 0.2
+    myText.position.x = -1
+    myText.position.z = -2
+    myText.position.y = 1.5
+    myText.color = 0x9966FF
+    
+    // Dispose the text
+    setTimeout(() => {
+        scene.remove(myText)
+        myText.Dispose()
+    }, 5000)
 })
+
 
 function render() {
     // Movements
