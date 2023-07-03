@@ -230,14 +230,14 @@ renderer.xr.addEventListener("sessionstart", (e) => {
     myText.fontSize = 0.2
     myText.position.x = -1
     myText.position.z = -2
-    myText.position.y = 1.5
+    myText.position.y = 1.7
     myText.color = 0x9966FF
     
     // Dispose the text
     setTimeout(() => {
         scene.remove(myText)
         myText.Dispose()
-    }, 5000)
+    }, 10000)
 })
 
 
