@@ -4,7 +4,8 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 // Parameters
 const modelScale = 0.2;
-const offsetY = 1;
+const offsetY = 1.5;
+const offsetZ = -1.5;
 
 const earthOrbitRadius = 10 * modelScale;
 const moonOrbitRadius = 3 * modelScale;
@@ -51,12 +52,15 @@ renderer.xr.enabled = true;
 // SCENE
 const scene = new THREE.Scene();
 
+// MAIN GROUP
+const mainGroup = new THREE.Group();
+
 // MAIN CAMERA
-const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio * modelScale, 12 * aspect_ratio * modelScale, 12 * modelScale, -12 * modelScale, 1, 1000 );
+const camera = new THREE.OrthographicCamera( - 12 * aspect_ratio * modelScale, 12 * aspect_ratio * modelScale, 12 * modelScale, -12 * modelScale, 1 * modelScale, 1000 );
 camera.position.set(0, earthOrbitRadius * 3, 0);
 camera.layers.enable(1);
 camera.layers.enable(2);
-scene.add(camera)
+mainGroup.add(camera)
 
 // Mooncam
 const mooncam = new THREE.PerspectiveCamera( 20, 1, earthRadius * 1.1, earthOrbitRadius * 2 );
@@ -73,7 +77,6 @@ earthcam.layers.enable(2);
 // ORBIT CONTROLS
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enablePan = false;
-controls.target.set(0, offsetY, 0);
 
 // TEXTURES
 const loader = new THREE.TextureLoader();
@@ -110,7 +113,7 @@ const orbitGeometry = new THREE.BufferGeometry().setFromPoints( points );
 const sunMesh = new THREE.Mesh(geometry, sunMaterial);
 sunMesh.position.set(0, 0, 0);
 sunMesh.scale.setScalar(sunRadius);
-scene.add(sunMesh);
+mainGroup.add(sunMesh);
 
 // Earth
 const earthGroup = new THREE.Group();		// create new Group
@@ -131,8 +134,7 @@ earthOrbit.layers.set(1);
 earthOrbit.layers.enable(2);
 earthGroup.add(earthOrbit);
 
-scene.add(earthGroup);
-scene.translateY(offsetY);
+mainGroup.add(earthGroup);
 
 
 
@@ -163,14 +165,18 @@ moonMainGroup.add(moonGroup);
 moonMainGroup.position.set(earthOrbitRadius, 0, 0);
 moonMainGroup.rotation.z = +moon_tiltSlider.value * 5.14 * Math.PI / 180;
 
-scene.add(moonMainGroup);
+mainGroup.add(moonMainGroup);
+
+
 
 // Lighting
 const light = new THREE.DirectionalLight( 0xffffff, 2 );
 light.position.set( 0, 0, 0 );
 light.target = earthMesh;
 light.castShadow = true;
-scene.add(light);
+mainGroup.add(light);
+
+scene.add(mainGroup);
 
 // Controls
 moon_tiltSlider.oninput = function() {
@@ -193,6 +199,16 @@ function resizer() {
     earthcam.updateProjectionMatrix();
 }
 window.addEventListener('resize', resizer);
+
+// XR session initialization
+renderer.xr.addEventListener("sessionstart", (e) => {
+
+    // Move the scene in front of the observer
+    const baseReferenceSpace = renderer.xr.getReferenceSpace()
+    const myTransform = new XRRigidTransform({y: offsetY, z: offsetZ})
+    const newReferenceSpace = baseReferenceSpace.getOffsetReferenceSpace(myTransform)
+    renderer.xr.setReferenceSpace(newReferenceSpace)
+})
 
 function render() {
     // Movements
