@@ -1,0 +1,31 @@
+{
+  "name": "eclipse",
+  "version": "1.0.0",
+  "description": "Educational visualization of Sun - Earth - Moon positions",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fornaeffe/eclipse.git"
+  },
+  "author": "Luca Fornasari",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/fornaeffe/eclipse/issues"
+  },
+  "homepage": "https://github.com/fornaeffe/eclipse#readme",
+  "devDependencies": {
+    "@types/three": "^0.152.1",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "three": "^0.154.0"
+  }
+}
