@@ -26,6 +26,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "three": "^0.154.0"
+    "three": "^0.154.0",
+    "troika-three-text": "^0.48.0-unicode.1"
   }
 }

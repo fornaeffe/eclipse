@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import {Text} from 'troika-three-text';
 
 // Parameters
 const modelScale = 0.2;
@@ -46,8 +47,18 @@ moonRenderer.shadowMap.enabled = true;
 
 
 // Setup VR button
-document.body.appendChild( VRButton.createButton( renderer ) );
+const myVRButton = VRButton.createButton( renderer )
+document.body.appendChild( myVRButton )
 renderer.xr.enabled = true;
+
+// Show VR button only if VR is supported
+if ( !('xr' in navigator) ) {
+    myVRButton.style.visibility = "hidden"
+} else {
+    navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+        if (!supported) myVRButton.style.visibility = "hidden"
+    })
+}
 
 // SCENE
 const scene = new THREE.Scene();
@@ -208,7 +219,27 @@ renderer.xr.addEventListener("sessionstart", (e) => {
     const myTransform = new XRRigidTransform({y: offsetY, z: offsetZ})
     const newReferenceSpace = baseReferenceSpace.getOffsetReferenceSpace(myTransform)
     renderer.xr.setReferenceSpace(newReferenceSpace)
+
+    // Give instructions
+    const myText = new Text()
+    scene.add(myText)
+    // Set properties to configure:
+    myText.text = 'Main button: move simulation forward\n' +
+        'Squeeze button: move simulation backward\n' +
+        'Thumbstick: fly'
+    myText.fontSize = 0.2
+    myText.position.x = -1
+    myText.position.z = -2
+    myText.position.y = 1.7
+    myText.color = 0x9966FF
+    
+    // Dispose the text
+    setTimeout(() => {
+        scene.remove(myText)
+        myText.Dispose()
+    }, 10000)
 })
+
 
 function render() {
     // Movements
@@ -217,6 +248,8 @@ function render() {
     // Check if VR is ON
     const session = renderer.xr.getSession()
     if (session && session.inputSources[0] && session.inputSources[0].gamepad && session.inputSources[0].gamepad.buttons[0]) {
+        let tX = 0
+        let tZ = 0
 
         const myGamepad = session.inputSources[0].gamepad
 
@@ -226,6 +259,27 @@ function render() {
         // If secondary button is pressed, set negative speed
         if (myGamepad.buttons[1].value > 0)
             speed = - myGamepad.buttons[1].value * 3
+
+        // Move user with thumbstick
+        if (myGamepad.axes[2] && myGamepad.axes[2] != 0)
+            tX = myGamepad.axes[2] * 0.01
+        
+        if (myGamepad.axes[3] && myGamepad.axes[3] != 0)
+            tZ = myGamepad.axes[3] * 0.01
+
+        if (tX != 0 || tZ != 0) {
+            // MOVE OBSERVER
+            // Get actual reference space
+            const baseReferenceSpace = renderer.xr.getReferenceSpace()
+            // Movement in observer space (inverted because it will be a reference space movement)
+            let myVector = new THREE.Vector3(-tX, 0, -tZ)
+            // Rotate the movement to get the movement vector in world space
+            myVector.applyQuaternion(renderer.xr.getCamera().quaternion)
+            // Change reference space
+            const myTransform = new XRRigidTransform(myVector) 
+            const newReferenceSpace = baseReferenceSpace.getOffsetReferenceSpace(myTransform)
+            renderer.xr.setReferenceSpace(newReferenceSpace)
+        }
         
         earthrot.checked = true
         earthrev.checked = true
