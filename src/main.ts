@@ -227,6 +227,8 @@ function render() {
     // Check if VR is ON
     const session = renderer.xr.getSession()
     if (session && session.inputSources[0] && session.inputSources[0].gamepad && session.inputSources[0].gamepad.buttons[0]) {
+        let tX = 0
+        let tZ = 0
 
         const myGamepad = session.inputSources[0].gamepad
 
@@ -236,6 +238,27 @@ function render() {
         // If secondary button is pressed, set negative speed
         if (myGamepad.buttons[1].value > 0)
             speed = - myGamepad.buttons[1].value * 3
+
+        // Move user with thumbstick
+        if (myGamepad.axes[2] && myGamepad.axes[2] != 0)
+            tX = myGamepad.axes[2] * 0.01
+        
+        if (myGamepad.axes[3] && myGamepad.axes[3] != 0)
+            tZ = myGamepad.axes[3] * 0.01
+
+        if (tX != 0 || tZ != 0) {
+            // MOVE OBSERVER
+            // Get actual reference space
+            const baseReferenceSpace = renderer.xr.getReferenceSpace()
+            // Movement in observer space (inverted because it will be a reference space movement)
+            let myVector = new THREE.Vector3(-tX, 0, -tZ)
+            // Rotate the movement to get the movement vector in world space
+            myVector.applyQuaternion(renderer.xr.getCamera().quaternion)
+            // Change reference space
+            const myTransform = new XRRigidTransform(myVector) 
+            const newReferenceSpace = baseReferenceSpace.getOffsetReferenceSpace(myTransform)
+            renderer.xr.setReferenceSpace(newReferenceSpace)
+        }
         
         earthrot.checked = true
         earthrev.checked = true
