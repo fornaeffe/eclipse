@@ -46,8 +46,18 @@ moonRenderer.shadowMap.enabled = true;
 
 
 // Setup VR button
-document.body.appendChild( VRButton.createButton( renderer ) );
+const myVRButton = VRButton.createButton( renderer )
+document.body.appendChild( myVRButton )
 renderer.xr.enabled = true;
+
+// Show VR button only if VR is supported
+if ( !('xr' in navigator) ) {
+    myVRButton.style.visibility = "hidden"
+} else {
+    navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+        if (!supported) myVRButton.style.visibility = "hidden"
+    })
+}
 
 // SCENE
 const scene = new THREE.Scene();
