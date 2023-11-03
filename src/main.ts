@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import {Text} from 'troika-three-text';
+import { mode } from '../webpack.config';
 
 // Parameters
 const modelScale = 0.2;
@@ -185,6 +186,10 @@ const light = new THREE.DirectionalLight( 0xffffff, 2 );
 light.position.set( 0, 0, 0 );
 light.target = earthMesh;
 light.castShadow = true;
+light.shadow.camera.left = -5 * modelScale
+light.shadow.camera.bottom = -5 * modelScale
+light.shadow.camera.top = 5 * modelScale
+light.shadow.camera.right = 5 * modelScale
 mainGroup.add(light);
 
 scene.add(mainGroup);
