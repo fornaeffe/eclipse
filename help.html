@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 	<head>
-        <title>Eclipse simulator - Help</title>
+        <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title data-i18n="help.title">Eclipse simulator - Aiuto</title>
         <style>
             * {
                 color: rgb(212, 212, 212);
@@ -11,6 +13,10 @@
             body {
                 background-color: #121212;
                 padding: 10px;
+            }
+            #pageToolbar {
+                float: right;
+                margin: 4px 0 10px 15px;
             }
             p {
                 margin: 0 0 10px 0;
@@ -42,24 +48,42 @@
 			color: #bada55;
             text-decoration: underline;
 			}
+            .language-selector {
+                color: #bada55;
+                background-color: #121212;
+                border: 1px solid rgba(186, 218, 85, 0.55);
+                border-radius: 4px;
+                font-size: 0.9em;
+                padding: 1px 3px;
+            }
+            .language-selector option {
+                color: rgb(212, 212, 212);
+                background-color: #121212;
+            }
         </style>
     </head>
     <body>
-        <h1>Aiuto</h1>
-        <p>
+        <div id="pageToolbar">
+            <select id="languageSelector" class="language-selector" data-i18n-attrs="aria-label:app.languageLabel;title:app.languageLabel">
+                <option value="it">IT</option>
+                <option value="en">EN</option>
+            </select>
+        </div>
+        <h1 data-i18n="help.heading">Aiuto</h1>
+        <p data-i18n="help.intro">
             Eclipse simulator è uno strumento didattico per spiegare il fenomeno delle eclissi 
             e delle fasi lunari.
         </p>
-        <p>
+        <p data-i18n="help.mainView">
             Nel riquadro principale è mostrato il sistema Sole-Terra-Luna; è possibile muovere
             la telecamera intorno al Sole, avvicinarsi o allontanarsi con il mouse o con il trascinamento.
             Questo riquadro usa una proiezione ortografica.
         </p>
-        <p>
+        <p data-i18n="help.moonView">
             Nel riquadro in alto a destra è mostrata la Luna come appare vista dalla Terra.
             Questo riquadro usa proiezione prospettica.
         </p>
-        <p>
+        <p data-i18n-html="help.controls">
             In alto a sinistra è presente un elenco espandibile di controlli.<br />
             È possibile attivare o bloccare la rotazione e la rivoluzione terrestre e la rivoluzione lunare.<br />
             È possibile variare l'angolo tra i piani delle orbite terrestre e lunare.<br />
@@ -68,7 +92,7 @@
             È possibile variare la velocità dell'animazione (ha effetto solo se almeno uno dei moti dei corpi
             celesti è attivo).
         </p>
-        <p>
+        <p data-i18n-html="help.limits">
             Il modello non è in scala, una delle conseguenze di questo è che le eclissi 
             avvengono più facilmente che nella realtà. Le orbite sono circolari anziché ellittiche.
             Non è rappresentata l'inclinazione dell'asse terrestre. Non è rappresentata la precessione
@@ -78,14 +102,15 @@
             <a href="https://www.solarsystemscope.com/">Solar System Scope</a> 
             o <a href="https://celestia.space/">Celestia</a>.
         </p>
-        <h1>Attribuzioni</h1>
-        <p>Sviluppato da Luca Fornasari: <a href="mailto:fornaeffe@gmail.com">fornaeffe@gmail.com</a></p>
-        <p>Superficie di Sole e Terra da <a href=https://github.com/marshallmurphy/solar-system-threejs>https://github.com/marshallmurphy/solar-system-threejs</a></p>
-        <p>Superficie della Luna da <a href="https://www.solarsystemscope.com/textures/">Solar System Scope</a></p>
-        <p>Origine delle parti di codice indicata nel codice stesso</p>
-        <p>
+        <h1 data-i18n="help.creditsHeading">Attribuzioni</h1>
+        <p data-i18n-html="help.developedBy">Sviluppato da Luca Fornasari: <a href="mailto:fornaeffe@gmail.com">fornaeffe@gmail.com</a></p>
+        <p data-i18n-html="help.sunEarthSurface">Superficie di Sole e Terra da <a href="https://github.com/marshallmurphy/solar-system-threejs">https://github.com/marshallmurphy/solar-system-threejs</a></p>
+        <p data-i18n-html="help.moonSurface">Superficie della Luna da <a href="https://www.solarsystemscope.com/textures/">Solar System Scope</a></p>
+        <p data-i18n="help.codeOrigin">Origine delle parti di codice indicata nel codice stesso</p>
+        <p data-i18n-html="help.contribute">
             Se desiderate suggerire modifiche, segnalare bug o contribuire allo sviluppo di questa
             web app, <a href="mailto:fornaeffe@gmail.com">scrivetemi</a> o visitate il <a href="https://github.com/fornaeffe/eclipse">repository</a>. 
         </p>
+		<script src="script/help.js"></script>
     </body>
 </html>

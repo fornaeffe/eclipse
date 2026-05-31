@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 	<head>
+		<meta charset="utf-8">
 		<link rel="icon" href="favicon.ico">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Eclipse simulator</title>
+		<title data-i18n="app.title">Eclipse simulator</title>
 		<style>
 			* {
 				outline-style: none;
@@ -29,6 +30,9 @@
 				bottom: 0;
 				left: 0;
 				margin: 5px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
 			}
 
 			/* unvisited link */
@@ -163,47 +167,59 @@
 			output {
 			color: #bada55;
 			}
+			.language-selector {
+				color: #bada55;
+				background-color: #121212;
+				border: 1px solid rgba(186, 218, 85, 0.55);
+				border-radius: 4px;
+				font-size: 0.85em;
+				padding: 1px 3px;
+			}
+			.language-selector option {
+				color: rgb(255, 255, 255);
+				background-color: #121212;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="container">
 			<canvas id="mainCanvas">
-				<p>This browser doesn't support canvas.</p>
+				<p data-i18n="app.canvasUnsupported">Questo browser non supporta canvas.</p>
 			</canvas>
 			<canvas id="moonViewer">
 			</canvas>
 
 			<ul id="myUL">
-				<li><span class="caret">Controlli</span>
+				<li><span class="caret" data-i18n="app.controls">Controlli</span>
 				  	<ul class="nested">
 						<li>
-							Velocità:<br />
+							<span data-i18n="app.speed">Velocità:</span><br />
 							<input type="range" min="-5" max="5" value="0" step="0.5" class="slider" id="speed" oninput="speedoutput.value = value"/>
 							<output id="speedoutput">0</output>
 						</li>
-						<li>Terra
+						<li><span data-i18n="app.earth">Terra</span>
 							<ul>
 								<li>
 									<input type="checkbox" id="earthrot" class="checkbox" />  
 									<label for="earthrot" class="switch"></label>
-									Rotazione
+									<span data-i18n="app.rotation">Rotazione</span>
 								</li>
 								<li>
 									<input type="checkbox" id="earthrev" class="checkbox" />  
 									<label for="earthrev" class="switch"></label>
-									Rivoluzione
+									<span data-i18n="app.revolution">Rivoluzione</span>
 								</li>
 							</ul>
 						</li>
-						<li>Luna
+						<li><span data-i18n="app.moon">Luna</span>
 							<ul>
 								<li>
 									<input type="checkbox" id="moonrev" class="checkbox" />  
 									<label for="moonrev" class="switch"></label>
-									Rivoluzione
+									<span data-i18n="app.revolution">Rivoluzione</span>
 								</li>
 								<li>
-									Esagerazione tilt: <br />
+									<span data-i18n="app.tiltExaggeration">Esagerazione tilt:</span><br />
 									<input type="range" min="1" max="5" value="3" step="1" class="slider" id="moon_tilt" />
 								</li>
 							</ul>
@@ -211,13 +227,17 @@
 						<li>
 							<input type="checkbox" id="earthcam" class="checkbox" />  
 							<label for="earthcam" class="switch"></label>
-							Zoom sulla Terra
+							<span data-i18n="app.zoomEarth">Zoom sulla Terra</span>
 						</li>
 				  	</ul>
 				</li>
 			</ul>
 			<div id="attribution">
-				<a href="help.html" target="_blank">Help & Credits</a>
+				<a href="help.html?lang=it" target="_blank" data-i18n="app.helpCredits" data-i18n-help-link>Aiuto e crediti</a>
+				<select id="languageSelector" class="language-selector" data-i18n-attrs="aria-label:app.languageLabel;title:app.languageLabel">
+					<option value="it">IT</option>
+					<option value="en">EN</option>
+				</select>
 			</div>
 
 		</div>
