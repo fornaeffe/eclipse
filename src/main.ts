@@ -55,7 +55,7 @@ document.body.appendChild( myVRButton )
 renderer.xr.enabled = true;
 
 // Show VR button only if VR is supported
-if ( !('xr' in navigator) ) {
+if ( !(navigator.xr) ) {
     myVRButton.style.visibility = "hidden"
 } else {
     navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
@@ -219,6 +219,10 @@ renderer.xr.addEventListener("sessionstart", (e) => {
 
     // Move the scene in front of the observer
     const baseReferenceSpace = renderer.xr.getReferenceSpace()
+    if (!baseReferenceSpace) {
+        throw new Error("Reference space not found")
+    }
+
     const myTransform = new XRRigidTransform({y: offsetY, z: offsetZ})
     const newReferenceSpace = baseReferenceSpace.getOffsetReferenceSpace(myTransform)
     renderer.xr.setReferenceSpace(newReferenceSpace)
@@ -272,6 +276,10 @@ function render() {
             // MOVE OBSERVER
             // Get actual reference space
             const baseReferenceSpace = renderer.xr.getReferenceSpace()
+            if (!baseReferenceSpace) {
+                throw new Error("Reference space not found")
+            }
+
             // Movement in observer space (inverted because it will be a reference space movement)
             let myVector = new THREE.Vector3(-tX, 0, -tZ)
             // Rotate the movement to get the movement vector in world space
